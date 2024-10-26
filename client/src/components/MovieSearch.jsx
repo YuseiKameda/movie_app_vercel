@@ -2,16 +2,13 @@ import React, { useState } from "react";
 import axios from "axios";
 
 const MovieSearch = () => {
-  const apiKey = import.meta.env.VITE_OMDB_API_KEY;
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.get(
-        `http://www.omdbapi.com/?s=${query}&apikey=${apiKey}`
-      );
+      const response = await axios.get(`/api/movies/search?q=${query}`);
       setMovies(response.data.Search || []);
     } catch (error) {
       console.error("Error fetching data", error);
