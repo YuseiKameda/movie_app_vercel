@@ -5,11 +5,23 @@ const MovieSearch = () => {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
 
+  // 検索機能
   const handleSearch = async (e) => {
     e.preventDefault();
+
+    // 入力が3文字以上か確認
+    if (query.length < 3) {
+      alert("Please enter at least 3 characters");
+      return;
+    }
+
+    //　データがなければから配列を返す
     try {
       const response = await axios.get(`/api/movies/search?q=${query}`);
-      setMovies(response.data.Search || []);
+      console.log(response.data);
+      setMovies(
+        Array.isArray(response.data.Search) ? response.data.Search : []
+      );
     } catch (error) {
       console.error("Error fetching data", error);
     }
