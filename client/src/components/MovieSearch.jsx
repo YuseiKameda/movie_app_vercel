@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const MovieSearch = () => {
   const [query, setQuery] = useState("");
@@ -19,11 +20,10 @@ const MovieSearch = () => {
     try {
       const response = await axios.get(`/api/movies/search?q=${query}`);
       console.log(response.data);
-      setMovies(
-        Array.isArray(response.data.Search) ? response.data.Search : []
-      );
+      setMovies(response.data);
     } catch (error) {
       console.error("Error fetching data", error);
+      setMovies([]);
     }
   };
 
@@ -40,10 +40,14 @@ const MovieSearch = () => {
       </form>
       <div>
         {movies.map((movie) => (
-          <div key={movie.imdbID}>
-            <h3>{movie.Title}</h3>
-            <img src={movie.Poster} alt={movie.Title} />
-            <p>{movie.Year}</p>
+          <div key={movie.id}>
+            <h3>
+              <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+            </h3>
+            <Link to={`/movies/${movie.id}`}>
+              <img src={movie.posterurl} alt={movie.title} />
+            </Link>
+            <p>{movie.year}</p>
           </div>
         ))}
       </div>
