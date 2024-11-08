@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
@@ -16,7 +16,7 @@ const MovieSearch = () => {
       return;
     }
 
-    //　データがなければから配列を返す
+    // データがなければから配列を返す
     try {
       const response = await axios.get(`/api/movies/search?q=${query}`);
       console.log(response.data);

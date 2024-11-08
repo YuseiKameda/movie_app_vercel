@@ -3,11 +3,14 @@ const axios = require('axios');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 dotenv.config();
 
 const app = express();
 const port = 3000;
+const SECRET_KEY = process.env.JWT_SECRET;
 const OMDB_API_KEY = process.env.OMDB_API_KEY;
 const db = mysql.createPool({
     host: process.env.DB_HOST,
@@ -17,6 +20,52 @@ const db = mysql.createPool({
 });
 
 app.use(cors());
+app.use(express.json());
+
+app.post('/auth/register', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    try {
+        //ハッシュ化
+        const hashPassword = await bcrypt.hash(password, 10);
+
+        await db.query('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)',[username, email, hashPassword]);
+        res.status(201).json({ message: 'ユーザーが登録されました' });
+    } catch (error) {
+        console.error('Error registering user:', error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            res.status(400).json({ error: 'ユーザー名またはメールアドレスがすでに使用されています。'});
+        } else {
+            res.status(500).json({ error: 'ユーザー登録に失敗しました' });
+        }
+    }
+})
+
+app.post('/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const [users] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
+
+        if (users.length === 0) {
+            return res.status(401).json({ error: 'user is not registered' });
+        }
+
+        const user = users[0];
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'password is not correct' });
+        }
+
+        const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h'});
+
+        res.json({ message: 'login succeeded', token });
+    } catch (error) {
+        console.error('Login error', error);
+        res.status(500).json({ error: 'login failure' });
+    }
+});
 
 app.get('/api/movies/search', async (req,res) => {
     const query = req.query.q;
