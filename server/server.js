@@ -10,10 +10,10 @@ const app = express();
 const port = 3000;
 const OMDB_API_KEY = process.env.OMDB_API_KEY;
 const db = mysql.createPool({
-    host:'localhost',
-    user: 'root',
-    password: 'Mydata7131',
-    database: 'movie_app_db'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 app.use(cors());
