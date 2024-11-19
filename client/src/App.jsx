@@ -6,6 +6,7 @@ import Header from "./components/header";
 import MovieDetail from "./components/MovieDetail";
 import Register from "./components/Register";
 import Login from "./components/Login";
+import Profile from "./components/Profile";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -30,6 +31,7 @@ const App = () => {
             path="/login"
             element={<Login setIsAuthenticated={setIsAuthenticated} />}
           />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
       {/* <Footer /> */}

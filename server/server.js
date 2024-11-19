@@ -67,6 +67,29 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
+app.get('/auth/profile', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'トークンが必要です' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId;
+
+        const [users] = await db.query('SELECT username, email, created_at FROM Users WHERE id = ?', [userId]);
+        if (users.length === 0) {
+            return res.status(401).json({ error: 'ユーザーが見つかりません' });
+        }
+
+        res.json(users[0]);
+    } catch (error) {
+        console.error('Error verifying token:', error);
+        res.status(401).json({ error: '無効なトークンです' });
+    }
+});
+
 app.get('/api/movies/search', async (req,res) => {
     const query = req.query.q;
 

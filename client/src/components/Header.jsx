@@ -18,6 +18,11 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
           <li>
             <Link to="/">Home</Link>
           </li>
+          {isAuthenticated && (
+            <li>
+              <Link to="/profile">プロフィール</Link>
+            </li>
+          )}
           {isAuthenticated ? (
             <>
               <li>
