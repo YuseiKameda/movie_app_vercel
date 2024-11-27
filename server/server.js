@@ -67,6 +67,41 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
+app.post("/api/movies/:id/like", async (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId;
+        const movieId = req.params.id;
+
+        const [existingLike] = await db.query(
+        "SELECT * FROM Likes WHERE user_id = ? AND movie_id = ?",
+        [userId, movieId]
+        );
+
+        if (existingLike.length > 0) {
+            // いいねが存在する場合、削除
+            await db.query(
+            "DELETE FROM Likes WHERE user_id = ? AND movie_id = ?",
+            [userId, movieId]
+            );
+            return res.status(200).json({ isLiked: false });
+        } else {
+        // いいねが存在しない場合、追加
+            await db.query(
+            "INSERT INTO Likes (user_id, movie_id) VALUES (?, ?)",
+            [userId, movieId]
+            );
+            return res.status(200).json({ isLiked: true });
+        }
+    } catch (error) {
+        console.error("Error toggling like status:", error);
+        res.status(500).json({ error: "Failed to toggle like status" });
+    }
+});
+
 app.get('/auth/profile', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
 
@@ -87,6 +122,29 @@ app.get('/auth/profile', async (req, res) => {
     } catch (error) {
         console.error('Error verifying token:', error);
         res.status(401).json({ error: '無効なトークンです' });
+    }
+});
+
+
+
+app.get('/api/movies/:id/like', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId;
+        const movieId = req.params.id;
+
+        const [result] = await db.query(
+            'SELECT * FROM Likes WHERE user_id = ? AND movie_id = ?',
+            [userId, movieId]
+        );
+
+        res.status(200).json({ isLiked: result.length > 0 });
+    } catch (error) {
+        console.error('Error fetching like status:', error);
+        res.status(500).json({ error: 'Failed to fetch like status' });
     }
 });
 

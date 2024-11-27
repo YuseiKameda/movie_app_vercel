@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-function Profile() {
+const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
 
@@ -39,6 +39,6 @@ function Profile() {
       <p>登録日: {new Date(profile.created_at).toLocaleDateString()}</p>
     </div>
   );
-}
+};
 
 export default Profile;

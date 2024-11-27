@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-function Register() {
+const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -59,6 +59,6 @@ function Register() {
       {message && <p>{message}</p>}
     </div>
   );
-}
+};
 
 export default Register;
