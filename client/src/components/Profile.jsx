@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+
 const Profile = () => {
   const [profile, setProfile] = useState(null);
+  const [likedMovies, setLikeMovies] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -14,6 +16,14 @@ const Profile = () => {
           },
         });
         setProfile(response.data);
+
+        // get liked movies list
+        const likesResponse = await axios.get("/api/users/likes", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setLikeMovies(likesResponse.data);
       } catch (err) {
         setError("プロフィール情報の取得に失敗しました");
         console.error("Error fetching profile:", err);
@@ -37,6 +47,25 @@ const Profile = () => {
       <p>ユーザー名: {profile.username}</p>
       <p>メールアドレス: {profile.email}</p>
       <p>登録日: {new Date(profile.created_at).toLocaleDateString()}</p>
+
+      <h3>いいねした映画</h3>
+      {likedMovies.length === 0 ? (
+        <p>いいねした映画がありません。</p>
+      ) : (
+        <ul>
+          {likedMovies.map((movie) => (
+            <li key={movie.id}>
+              <h4>{movie.title}</h4>
+              <img
+                src={movie.posterurl}
+                alt={movie.title}
+                style={{ width: "100px" }}
+              />
+              <p>公開年: {movie.year}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

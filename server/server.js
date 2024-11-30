@@ -125,7 +125,28 @@ app.get('/auth/profile', async (req, res) => {
     }
 });
 
+app.get('/api/users/likes', async(req,res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId;
+
+        const [likeMovies] = await db.query(
+            `SELECT Movies.id, Movies.title, Movies.posterurl, Movies.year
+            FROM Likes
+            JOIN Movies ON Likes.Movie_id = Movies.id
+            WHERE Likes.user_id = ?`,
+            [userId]
+        );
+
+        res.status(200).json(likeMovies);
+    } catch (error) {
+        console.error('error fetching likes movies:', error);
+        res.status(500).json({ error: 'Failed to fetch liked movies' });
+    }
+});
 
 app.get('/api/movies/:id/like', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
