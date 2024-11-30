@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const MovieDetail = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState({});
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
@@ -57,6 +58,16 @@ const MovieDetail = () => {
       <p>Director: {movie.director}</p>
       <p>Year: {movie.year}</p>
       <p>Runtime: {movie.runtime}</p>
+
+      <button
+        onClick={() =>
+          window.history.length > 1 ? navigate(-1) : navigate("/")
+        }
+        style={{ marginTop: "20px" }}
+      >
+        戻る
+      </button>
+
       <button onClick={handleLikClick}>
         {isLiked ? "いいねを取り消す" : "いいね"}
       </button>

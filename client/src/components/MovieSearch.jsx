@@ -1,35 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 const MovieSearch = () => {
-  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [query, setQuery] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("q") || "";
+  });
+
   const [movies, setMovies] = useState([]);
 
   // 検索機能
-  const handleSearch = async (e) => {
-    e.preventDefault();
-
-    // 入力が3文字以上か確認
-    if (query.length < 3) {
-      alert("Please enter at least 3 characters");
-      return;
-    }
-
-    // データがなければから配列を返す
+  const handleSearch = useCallback(async (searchQuery) => {
     try {
-      const response = await axios.get(`/api/movies/search?q=${query}`);
+      const response = await axios.get(`/api/movies/search?q=${searchQuery}`);
       console.log(response.data);
       setMovies(response.data);
     } catch (error) {
       console.error("Error fetching data", error);
       setMovies([]);
     }
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchQuery = params.get("q");
+
+    if (searchQuery && searchQuery.length >= 3) {
+      handleSearch(searchQuery);
+    }
+  }, [location.search, handleSearch]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.length < 3) {
+      alert("Please enter at least 3 characters");
+      return;
+    }
+    navigate(`?q=${encodeURIComponent(query)}`);
   };
 
   return (
     <div>
-      <form onSubmit={handleSearch}>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           value={query}

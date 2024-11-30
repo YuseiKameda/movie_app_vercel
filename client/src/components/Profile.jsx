@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 const Profile = () => {
@@ -55,12 +56,16 @@ const Profile = () => {
         <ul>
           {likedMovies.map((movie) => (
             <li key={movie.id}>
-              <h4>{movie.title}</h4>
-              <img
-                src={movie.posterurl}
-                alt={movie.title}
-                style={{ width: "100px" }}
-              />
+              <Link to={`/movies/${movie.id}`}>
+                <h4>{movie.title}</h4>
+              </Link>
+              <Link to={`/movies/${movie.id}`}>
+                <img
+                  src={movie.posterurl}
+                  alt={movie.title}
+                  style={{ width: "100px" }}
+                />
+              </Link>
               <p>公開年: {movie.year}</p>
             </li>
           ))}
