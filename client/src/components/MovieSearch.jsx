@@ -51,8 +51,14 @@ const MovieSearch = () => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for a movie"
+          className="p-3 pl-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button type="submit">Search</button>
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Search
+        </button>
       </form>
       <div>
         {movies.map((movie) => (

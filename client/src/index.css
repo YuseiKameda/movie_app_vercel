@@ -2,29 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* header {
-  background-color: #333;
-  color: white;
-  padding: 10px 20px;
+a {
+  @apply text-blue-500 hover:text-blue-700;
 }
 
-footer {
-  background-color: #333;
-  color: white;
-  text-align: center;
-  padding: 10px;
-  position: fixed;
-  width: 100%;
-  bottom: 0;
+p {
+  @apply text-gray-800;
 }
-
-nav ul {
-  list-style: none;
-  display: flex;
-  gap: 15px;
-}
-
-nav a {
-  color: white;
-  text-decoration: none;
-} */

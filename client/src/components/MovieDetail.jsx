@@ -133,9 +133,15 @@ const MovieDetail = () => {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="コメントを記入してください"
+              className="p-3 pl-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <button onClick={handleRecordMovie}>見た映画に追加</button>
+          <button
+            onClick={handleRecordMovie}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            見た映画に追加
+          </button>
         </>
       ) : (
         <>
@@ -157,7 +163,12 @@ const MovieDetail = () => {
               placeholder="コメントを編集してください"
             />
           </div>
-          <button onClick={handleUpdateRecord}>記録を更新</button>
+          <button
+            onClick={handleUpdateRecord}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            記録を更新
+          </button>
         </>
       )}
 
@@ -165,12 +176,15 @@ const MovieDetail = () => {
         onClick={() =>
           window.history.length > 1 ? navigate(-1) : navigate("/")
         }
-        style={{ marginTop: "20px" }}
+        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       >
         戻る
       </button>
 
-      <button onClick={handleLikClick}>
+      <button
+        onClick={handleLikClick}
+        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      >
         {isLiked ? "いいねを取り消す" : "いいね"}
       </button>
     </div>
