@@ -5,6 +5,7 @@ import axios from "axios";
 const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [likedMovies, setLikeMovies] = useState([]);
+  const [watchedMovies, setWatchedMovies] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -25,6 +26,14 @@ const Profile = () => {
           },
         });
         setLikeMovies(likesResponse.data);
+
+        // get watched movies list
+        const watchedResponse = await axios.get("/api/users/watched", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setWatchedMovies(watchedResponse.data);
       } catch (err) {
         setError("プロフィール情報の取得に失敗しました");
         console.error("Error fetching profile:", err);
@@ -67,6 +76,29 @@ const Profile = () => {
                 />
               </Link>
               <p>公開年: {movie.year}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h3>見た映画</h3>
+      {watchedMovies.length === 0 ? (
+        <p>見た映画がありません</p>
+      ) : (
+        <ul>
+          {watchedMovies.map((movie) => (
+            <li key={movie.id}>
+              <Link to={`/movies/${movie.id}`}>
+                <h4>{movie.title}</h4>
+              </Link>
+              <img
+                src={movie.posterurl}
+                alt={movie.title}
+                style={{ width: "100px" }}
+              />
+              <p>公開年: {movie.year}</p>
+              <p>評価: {movie.rating} 星</p>
+              <p>コメント: {movie.comment}</p>
             </li>
           ))}
         </ul>

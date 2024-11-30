@@ -5,6 +5,9 @@ import axios from "axios";
 const MovieDetail = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState({});
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isRecorded, setIsRecorded] = useState(false);
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
 
@@ -16,6 +19,14 @@ const MovieDetail = () => {
         setMovie(response.data);
 
         const token = localStorage.getItem("token");
+
+        const recordResponse = await axios.get(`/api/records/${id}`, {
+          headers: { Authorization: ` Bearer ${token}` },
+        });
+        setIsRecorded(recordResponse.data.isRecorded);
+        setRating(recordResponse.data.rating || 0);
+        setComment(recordResponse.data.comment || "");
+
         const likeResponse = await axios.get(`/api/movies/${id}/like`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -26,6 +37,30 @@ const MovieDetail = () => {
     };
     fetchMovie();
   }, [id]);
+
+  const handleRecordMovie = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("ログインが必要です");
+        return;
+      }
+
+      const watchedAt = new Date().toISOString().split("T")[0];
+
+      await axios.post(
+        "/api/records/add",
+        { movieId: id, watchedAt, rating, comment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setIsRecorded(true);
+      alert("映画を記録しました！");
+    } catch (error) {
+      console.error("Error recording movie", error);
+      alert("映画の記録に失敗しました");
+    }
+  };
 
   const handleLikClick = async () => {
     try {
@@ -58,6 +93,32 @@ const MovieDetail = () => {
       <p>Director: {movie.director}</p>
       <p>Year: {movie.year}</p>
       <p>Runtime: {movie.runtime}</p>
+
+      {!isRecorded ? (
+        <>
+          <div>
+            <label>評価を選択：</label>
+            <select value={rating} onChange={(e) => setRating(e.target.value)}>
+              {[1, 2, 3, 4, 5].map((r) => (
+                <option key={r} value={r}>
+                  {r} 星
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label>コメント:</label>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="コメントを記入してください"
+            />
+          </div>
+          <button onClick={handleRecordMovie}>見た映画に追加</button>
+        </>
+      ) : (
+        <p>この映画は記録済みです。評価： {rating} 星</p>
+      )}
 
       <button
         onClick={() =>

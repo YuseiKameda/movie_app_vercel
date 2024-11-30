@@ -102,6 +102,43 @@ app.post("/api/movies/:id/like", async (req, res) => {
     }
 });
 
+app.post('/api/records/add', async(req,res) => {
+    const { movieId, watchedAt, rating, comment } = req.body;
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId;
+
+        const [existingRecord] = await db.query(
+            'SELECT * FROM Records WHERE user_id = ? AND movie_id = ?',
+            [userId, movieId]
+        );
+
+        if (existingRecord.length > 0) {
+            await db.query(
+                `UPDATE Records SET watched_at = ?, rating = ?, comment = ? WHERE user_id = ? AND movie_id = ?`,
+                [watchedAt, rating, comment, userId, movieId]
+            );
+            res.status(200).json({ message: 'Record update successfully' });
+        } else {
+            await db.query(
+                `INSERT INTO Records (user_id, movie_id, watched_at, rating, comment)
+                VALUES (?, ?, ?, ?, ?)`,
+                [userId, movieId, watchedAt, rating, comment]
+            );
+            res.status(201).json({ message: 'Movie recorded successfully' });
+        }
+    } catch (error) {
+        console.error('error recording movie:', error);
+        res.status(500).json({ error: 'Failed to record movie' });
+    }
+});
+
 app.get('/auth/profile', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
 
@@ -145,6 +182,32 @@ app.get('/api/users/likes', async(req,res) => {
     } catch (error) {
         console.error('error fetching likes movies:', error);
         res.status(500).json({ error: 'Failed to fetch liked movies' });
+    }
+});
+
+app.get('/api/users/watched', async(req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId;
+
+        const [watchedMovies] = await db.query(
+            `SELECT Movies.id, Movies.title, Movies.posterurl, Movies.year, Records.rating, Records.comment
+            FROM Records
+            JOIN Movies ON Records.movie_id = Movies.id
+            WHERE Records.user_id = ?`,
+            [userId]
+        );
+
+        res.status(200).json(watchedMovies);
+    } catch (error) {
+        console.error('error fetching watched movies:', error);
+        res.status(500).json({ error: ' failed to fetch watched movies' });
     }
 });
 
@@ -228,6 +291,35 @@ app.get('/api/movies/:id', async (req,res) => {
         res.status(500).json({ error: 'Error fetching movie details' });
     }
 });
+
+app.get('/api/records/:movieId', async(req,res) => {
+    const { movieId } = req.params;
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId;
+
+        const [records] = await db.query(
+            'SELECT rating, comment FROM Records WHERE user_id = ? AND movie_id = ?',
+            [userId, movieId]
+        );
+
+        if (records.length > 0) {
+            res.status(200).json({ isRecorded: true, rating: records[0].rating, comment: records[0].comment, });
+        } else {
+            res.status(200).json({ isRecorded: false });
+        }
+    } catch (error) {
+        console.error('error fetching record:', error);
+        res.status(500).json({ error: 'failed to fetch record' });
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`サーバー起動 ${port}`);
