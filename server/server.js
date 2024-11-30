@@ -320,6 +320,32 @@ app.get('/api/records/:movieId', async(req,res) => {
     }
 })
 
+app.put('/api/records/update', async(req, res) => {
+    const { movieId, rating, comment } = req.body;
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId;
+
+        const [result] = await db.query(
+            'Update Records SET rating = ?, comment = ? WHERE user_id = ? AND movie_id = ?',
+            [rating, comment, userId, movieId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Record not found' });
+        }
+        res.status(200).json({ message: 'Record update successfully' });
+    } catch (error) {
+        console.error('error updating record:', error);
+        res.status(500).json({ error: 'failed to update record' });
+    }
+});
 
 app.listen(port, () => {
     console.log(`サーバー起動 ${port}`);

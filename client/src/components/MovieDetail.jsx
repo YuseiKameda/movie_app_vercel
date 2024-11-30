@@ -8,8 +8,8 @@ const MovieDetail = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isRecorded, setIsRecorded] = useState(false);
-  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -37,6 +37,27 @@ const MovieDetail = () => {
     };
     fetchMovie();
   }, [id]);
+
+  const handleUpdateRecord = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("ログインが必要です");
+        return;
+      }
+
+      await axios.put(
+        "/api/records/update",
+        { movieId: id, rating, comment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("記録を更新しました！");
+    } catch (error) {
+      console.error("error updating record:", error);
+      alert("記録の更新に失敗しました");
+    }
+  };
 
   const handleRecordMovie = async () => {
     try {
@@ -117,7 +138,27 @@ const MovieDetail = () => {
           <button onClick={handleRecordMovie}>見た映画に追加</button>
         </>
       ) : (
-        <p>この映画は記録済みです。評価： {rating} 星</p>
+        <>
+          <div>
+            <label>評価を編集：</label>
+            <select value={rating} onChange={(e) => setRating(e.target.value)}>
+              {[1, 2, 3, 4, 5].map((r) => (
+                <option key={r} value={r}>
+                  {r} 星
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label>コメントを編集：</label>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="コメントを編集してください"
+            />
+          </div>
+          <button onClick={handleUpdateRecord}>記録を更新</button>
+        </>
       )}
 
       <button
