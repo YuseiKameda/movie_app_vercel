@@ -44,18 +44,18 @@ const MovieSearch = () => {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
+    <div className="mt-2">
+      <form onSubmit={handleSubmit} className="relative">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for a movie"
-          className="p-3 pl-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="bg-gray-800 text-gray-100 rounded-md py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="p-2 rounded-md bg-gray-500 text-gray-300 hover:bg-gray-700 transition-colors"
         >
           Search
         </button>

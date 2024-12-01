@@ -11,35 +11,48 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
   };
 
   return (
-    <header className="bg-green-600 text-white p-4">
-      <nav className="container mx-auto flex justify-between items-center">
-        <h1 className="text-xl font-bold">Movie App</h1>
+    <header className="bg-gray-900 text-gray-100 shadow-lg">
+      <nav className="container mx-auto flex justify-between items-center p-4">
+        <h1 className="text-xl font-bold text-red-500">Movie App</h1>
         <ul className="flex space-x-4">
           <li>
-            <Link to="/" className="hover:underline">
+            <Link to="/" className="hover:text-red-500 transition-colors">
               Home
             </Link>
           </li>
           {isAuthenticated && (
             <li>
-              <Link to="/profile" className="hover:underline">
+              <Link
+                to="/profile"
+                className="hover:text-red-500 transition-colors"
+              >
                 プロフィール
               </Link>
             </li>
           )}
           {isAuthenticated ? (
             <>
-              <li>
+              <li className="hover:text-red-500 transition-colors">
                 <button onClick={handleLogout}>Logout</button>
               </li>
             </>
           ) : (
             <>
               <li>
-                <Link to="/register">Register</Link>
+                <Link
+                  to="/register"
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Register
+                </Link>
               </li>
               <li>
-                <Link to="/login">ログイン</Link>
+                <Link
+                  to="/login"
+                  className="hover:text-red-500 transition-colors"
+                >
+                  ログイン
+                </Link>
               </li>
             </>
           )}
