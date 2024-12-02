@@ -44,32 +44,47 @@ const MovieSearch = () => {
   };
 
   return (
-    <div className="mt-2">
-      <form onSubmit={handleSubmit} className="relative">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for a movie"
-          className="bg-gray-800 text-gray-100 rounded-md py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
-        <button
-          type="submit"
-          className="p-2 rounded-md bg-gray-500 text-gray-300 hover:bg-gray-700 transition-colors"
-        >
-          Search
-        </button>
-      </form>
-      <div>
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      <div className="container mx-auto px-4 py-8">
+        <form onSubmit={handleSubmit} className="relative">
+          <div className="flex max-w-3xl mx-auto">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for a movie"
+              className="flex-grow px-4 py-2 rounded-l-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+            />
+            <button
+              type="submit"
+              className="px-6 py-2 bg-red-600 text-white rounded-r-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              Search
+            </button>
+          </div>
+        </form>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
         {movies.map((movie) => (
-          <div key={movie.id}>
-            <h3>
-              <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
-            </h3>
+          <div
+            key={movie.id}
+            className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
+          >
+            <div className="p-4">
+              <h3 className="text-gray-500 text-xl font-semibold mb-2">
+                <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+              </h3>
+            </div>
             <Link to={`/movies/${movie.id}`}>
-              <img src={movie.posterurl} alt={movie.title} />
+              <img
+                src={movie.posterurl}
+                alt={movie.title}
+                width={300}
+                height={400}
+                className="w-full object-cover"
+              />
             </Link>
-            <p>{movie.year}</p>
+            <p className="text-gray-400">{movie.year}</p>
           </div>
         ))}
       </div>

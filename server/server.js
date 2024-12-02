@@ -26,18 +26,29 @@ app.post('/auth/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
+        const [existingUser] = await db.query(
+            'SELECT * FROM Users WHERE username = ? OR email = ?',
+            [username, email]
+        );
+
+        if (existingUser.length > 0) {
+            return res.status(400).json({
+                error: 'ユーザー名またはメールアドレスがすでに使用されています。'
+            });
+        }
         //ハッシュ化
         const hashPassword = await bcrypt.hash(password, 10);
+        const result = await db.query('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)',[username, email, hashPassword]);
 
-        await db.query('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)',[username, email, hashPassword]);
-        res.status(201).json({ message: 'ユーザーが登録されました' });
+        const [users] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
+        const user = users[0];
+        const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
+
+
+        res.status(201).json({ message: 'ユーザーが登録されました', token, });
     } catch (error) {
         console.error('Error registering user:', error);
-        if (error.code === 'ER_DUP_ENTRY') {
-            res.status(400).json({ error: 'ユーザー名またはメールアドレスがすでに使用されています。'});
-        } else {
-            res.status(500).json({ error: 'ユーザー登録に失敗しました' });
-        }
+        res.status(500).json({ error: 'ユーザー登録に失敗しました' });
     }
 })
 

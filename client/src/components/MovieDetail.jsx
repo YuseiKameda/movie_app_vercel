@@ -107,86 +107,113 @@ const MovieDetail = () => {
   if (!movie) return <p>Loading...</p>;
 
   return (
-    <div>
-      <h1>{movie.title}</h1>
-      <img src={movie.posterurl} alt={movie.title} />
-      <p>{movie.plot}</p>
-      <p>Director: {movie.director}</p>
-      <p>Year: {movie.year}</p>
-      <p>Runtime: {movie.runtime}</p>
-
-      {!isRecorded ? (
-        <>
-          <div>
-            <label>評価を選択：</label>
-            <select value={rating} onChange={(e) => setRating(e.target.value)}>
-              {[1, 2, 3, 4, 5].map((r) => (
-                <option key={r} value={r}>
-                  {r} 星
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>コメント:</label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="コメントを記入してください"
-              className="p-3 pl-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div className="md:flex">
+          <div className="md:w-1/3">
+            <img
+              src={movie.posterurl}
+              alt={movie.title}
+              width={400}
+              height={600}
+              className="h-auto w-full"
             />
           </div>
-          <button
-            onClick={handleRecordMovie}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            見た映画に追加
-          </button>
-        </>
-      ) : (
-        <>
-          <div>
-            <label>評価を編集：</label>
-            <select value={rating} onChange={(e) => setRating(e.target.value)}>
-              {[1, 2, 3, 4, 5].map((r) => (
-                <option key={r} value={r}>
-                  {r} 星
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>コメントを編集：</label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="コメントを編集してください"
-            />
-          </div>
-          <button
-            onClick={handleUpdateRecord}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            記録を更新
-          </button>
-        </>
-      )}
+          <div className="md:w-2/3 p-6 space-y-4">
+            <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
+            <div className="flex items-center space-x-4 text-sm">
+              <p>Director: {movie.director}</p>
+              <p>Year: {movie.year}</p>
+              <p>Runtime: {movie.runtime}</p>
+            </div>
+            <div>
+              <p className="text-gray-300">{movie.plot}</p>
+              <div className="border-t border-gray-700 my-4"></div>
+              {!isRecorded ? (
+                <>
+                  <div>
+                    <label>評価を選択：</label>
+                    <select
+                      value={rating}
+                      onChange={(e) => setRating(e.target.value)}
+                      className="flex space-x-1"
+                    >
+                      {[1, 2, 3, 4, 5].map((r) => (
+                        <option key={r} value={r}>
+                          {r} 星
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="コメントを記入してください"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={4}
+                    />
+                  </div>
+                  <button
+                    onClick={handleRecordMovie}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                  >
+                    見た映画に追加
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label>評価を編集：</label>
+                    <select
+                      value={rating}
+                      onChange={(e) => setRating(e.target.value)}
+                      className="flex space-x-1"
+                    >
+                      {[1, 2, 3, 4, 5].map((r) => (
+                        <option key={r} value={r}>
+                          {r} 星
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="コメントを編集してください"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={4}
+                    />
+                  </div>
+                  <button
+                    onClick={handleUpdateRecord}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                  >
+                    記録を更新
+                  </button>
+                </>
+              )}
 
-      <button
-        onClick={() =>
-          window.history.length > 1 ? navigate(-1) : navigate("/")
-        }
-        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        戻る
-      </button>
+              <button
+                onClick={() =>
+                  window.history.length > 1 ? navigate(-1) : navigate("/")
+                }
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                戻る
+              </button>
 
-      <button
-        onClick={handleLikClick}
-        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        {isLiked ? "いいねを取り消す" : "いいね"}
-      </button>
+              <button
+                onClick={handleLikClick}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                {isLiked ? "いいねを取り消す" : "いいね"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

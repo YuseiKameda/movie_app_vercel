@@ -1,11 +1,14 @@
 import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
-const Register = () => {
+const Register = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,7 +19,9 @@ const Register = () => {
         email,
         password,
       });
-      setMessage(response.data.message);
+      localStorage.setItem("token", response.data.token);
+      setIsAuthenticated(true);
+      navigate("/");
     } catch (error) {
       setMessage(error.response?.data?.error || "登録に失敗しました");
       console.error("Registration error:", error);
@@ -88,10 +93,16 @@ const Register = () => {
             </button>
           </div>
         </form>
+        <div className="mt-4 text-red-500 text-center font-semibold">
+          {message && <p>{message}</p>}
+        </div>
       </div>
-      {message && <p>{message}</p>}
     </div>
   );
+};
+
+Register.propTypes = {
+  setIsAuthenticated: PropTypes.func.isRequired,
 };
 
 export default Register;

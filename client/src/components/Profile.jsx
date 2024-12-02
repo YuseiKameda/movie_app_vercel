@@ -52,7 +52,7 @@ const Profile = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900 text-gray-100">
       <h2>プロフィール</h2>
       <p>ユーザー名: {profile.username}</p>
       <p>メールアドレス: {profile.email}</p>
@@ -62,46 +62,62 @@ const Profile = () => {
       {likedMovies.length === 0 ? (
         <p>いいねした映画がありません。</p>
       ) : (
-        <ul>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
           {likedMovies.map((movie) => (
-            <li key={movie.id}>
-              <Link to={`/movies/${movie.id}`}>
-                <h4>{movie.title}</h4>
-              </Link>
+            <div
+              key={movie.id}
+              className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
+            >
+              <div className="p-4">
+                <h3 className="text-gray-500 text-xl font-semibold mb-2">
+                  <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+                </h3>
+              </div>
               <Link to={`/movies/${movie.id}`}>
                 <img
                   src={movie.posterurl}
                   alt={movie.title}
-                  style={{ width: "100px" }}
+                  width={300}
+                  height={400}
+                  className="w-full object-cover"
                 />
               </Link>
-              <p>公開年: {movie.year}</p>
-            </li>
+              <p className="text-gray-400">{movie.year}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       <h3>見た映画</h3>
       {watchedMovies.length === 0 ? (
         <p>見た映画がありません</p>
       ) : (
-        <ul>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
           {watchedMovies.map((movie) => (
-            <li key={movie.id}>
+            <div
+              key={movie.id}
+              className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
+            >
+              <div className="p-4">
+                <h3 className="text-gray-500 text-xl font-semibold mb-2">
+                  <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+                </h3>
+              </div>
               <Link to={`/movies/${movie.id}`}>
-                <h4>{movie.title}</h4>
+                <img
+                  src={movie.posterurl}
+                  alt={movie.title}
+                  width={300}
+                  height={400}
+                  className="w-full object-cover"
+                />
               </Link>
-              <img
-                src={movie.posterurl}
-                alt={movie.title}
-                style={{ width: "100px" }}
-              />
-              <p>公開年: {movie.year}</p>
-              <p>評価: {movie.rating} 星</p>
-              <p>コメント: {movie.comment}</p>
-            </li>
+              <p className="text-gray-400">{movie.year}</p>
+              <p className="text-gray-400">評価: {movie.rating}</p>
+              <p className="text-gray-400">コメント: {movie.comment}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
