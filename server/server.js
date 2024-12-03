@@ -22,6 +22,10 @@ const db = mysql.createPool({
 app.use(cors());
 app.use(express.json());
 
+app.get('/', async (req, res) => {
+    res.send('home');
+});
+
 app.post('/auth/register', async (req, res) => {
     const { username, email, password } = req.body;
 
