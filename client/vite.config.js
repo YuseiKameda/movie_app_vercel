@@ -18,6 +18,6 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'build', // ビルド後のディレクトリを指定
+    outDir: 'dist', // ビルド後のディレクトリを指定
   },
 })
