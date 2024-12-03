@@ -3,6 +3,7 @@ const axios = require('axios');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -12,29 +13,42 @@ const app = express();
 const port = process.env.PORT || 3000;
 const SECRET_KEY = process.env.JWT_SECRET;
 const OMDB_API_KEY = process.env.OMDB_API_KEY;
-const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+const db = new Pool({
+    connectionString: process.env.SUPABASE_DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+// const db = mysql.createPool({
+//     host: process.env.DB_HOST,
+//     user: process.env.DB_USER,
+//     password: process.env.DB_PASSWORD,
+//     database: process.env.DB_NAME
+// });
+
+db.connect((err) => {
+    if (err) {
+        console.error('Database connection error:', err.stack);
+    } else {
+        console.log('Connected to Supabase database');
+    }
 });
 
 app.use(cors());
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-    res.send('home');
+    res.send('home and supabase working');
 });
 
 app.post('/auth/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        const [existingUser] = await db.query(
-            'SELECT * FROM Users WHERE username = ? OR email = ?',
+        const result = await db.query(
+            'SELECT * FROM Users WHERE username = $1 OR email = $2',
             [username, email]
         );
 
+        const existingUser = result.rows;
         if (existingUser.length > 0) {
             return res.status(400).json({
                 error: 'ユーザー名またはメールアドレスがすでに使用されています。'
@@ -42,7 +56,7 @@ app.post('/auth/register', async (req, res) => {
         }
         //ハッシュ化
         const hashPassword = await bcrypt.hash(password, 10);
-        const result = await db.query('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)',[username, email, hashPassword]);
+        const result2 = await db.query('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)',[username, email, hashPassword]);
 
         const [users] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
         const user = users[0];
@@ -251,7 +265,8 @@ app.get('/api/movies/search', async (req,res) => {
     const query = req.query.q;
 
     try {
-        const [movies] = await db.query('SELECT * FROM Movies WHERE title Like ?', [`%${query}%`]);
+        const result = await db.query('SELECT * FROM Movies WHERE title ILIKE $1', [`%${query}%`]);
+        const movies = result.rows;
 
         if (movies.length > 0) {
             return res.json(movies);
@@ -267,7 +282,7 @@ app.get('/api/movies/search', async (req,res) => {
             const { Runtime, Director, Plot } = movieDetails.data;
 
             await db.query(
-                'INSERT INTO Movies (id, title, year, posterurl, runtime, director, plot ) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO Movies (id, title, year, posterurl, runtime, director, plot ) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING',
                 [imdbID, Title, Year, Poster, Runtime, Director, Plot]
             );
         }
