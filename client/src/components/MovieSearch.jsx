@@ -20,7 +20,7 @@ const MovieSearch = () => {
   const handleSearch = useCallback(async (searchQuery) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/movies/search?q=${searchQuery}`
+        `${API_BASE_URL}/api/movies/search?q=${searchQuery}`
       );
       console.log(response.data);
       setMovies(response.data);
