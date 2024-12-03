@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 const MovieSearch = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const MovieSearch = () => {
   const handleSearch = useCallback(async (searchQuery) => {
     try {
       const response = await axios.get(
-        `${API_URL}/movies/search?q=${searchQuery}`
+        `${API_BASE_URL}/movies/search?q=${searchQuery}`
       );
       console.log(response.data);
       setMovies(response.data);
