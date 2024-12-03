@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const SECRET_KEY = process.env.JWT_SECRET;
 const OMDB_API_KEY = process.env.OMDB_API_KEY;
 const db = mysql.createPool({
