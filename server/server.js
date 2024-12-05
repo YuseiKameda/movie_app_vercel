@@ -328,7 +328,7 @@ app.get('/api/movies/search', async (req,res) => {
         const response = await axios.get(`http://www.omdbapi.com/?s=${query}&apikey=${OMDB_API_KEY}`);
         const apiMovies = response.data.Search || [];
 
-        //データベースへの保存
+
         for (const movie of apiMovies) {
             const { imdbID, Title, Year, Poster } = movie;
             const movieDetails = await axios.get(`http://www.omdbapi.com/?i=${imdbID}&apikey=${OMDB_API_KEY}`);
@@ -367,15 +367,13 @@ app.get('/api/movies/search', async (req,res) => {
 app.get('/api/movies/:id', async (req,res) => {
     const movieID = req.params.id;
     try {
-        // Supabaseで映画データを検索
         const { data: existingMovie, error: fetchError } = await supabase
             .from('movies')
             .select('*')
             .eq('id', movieID)
-            .single(); // 単一の結果を取得
+            .single();
 
         if (fetchError && fetchError.code !== 'PGRST116') {
-            // PGRST116はデータが存在しない場合のエラーコード
             throw fetchError;
         }
         if (existingMovie) {
@@ -455,7 +453,7 @@ app.put('/api/records/update', async(req, res) => {
 
         const { data, error: updateError } = await supabase
             .from('records')
-            .update({ rating, comment })
+            .update({ rating: Number(rating), comment })
             .eq('user_id', userId)
             .eq('movie_id', movieId);
 
