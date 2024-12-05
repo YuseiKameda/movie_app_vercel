@@ -183,10 +183,10 @@ app.post('/api/records/add', async(req,res) => {
             throw fetchError;
         }
 
-        if (existingRecord.length > 0) {
+        if (existingRecord) {
             const { error: updateError } = await supabase
                 .from('records')
-                .update({ watched_at: watchedAt, rating, comment })
+                .update({ watched_at: watchedAt, rating: Number(rating), comment })
                 .eq('user_id', userId)
                 .eq('movie_id', movieId);
 
@@ -200,7 +200,7 @@ app.post('/api/records/add', async(req,res) => {
                         user_id: userId,
                         movie_id: movieId,
                         watched_at: watchedAt,
-                        rating,
+                        rating: Number(rating),
                         comment,
                     },
                 ]);
