@@ -36,7 +36,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-    res.send('home and supabase working');
+    res.send(`home and supabase working: environment value:${process.env.SUPABASE_DATABASE_URL}`);
     console.log('Hello:',process.env.OMDB_API_KEY);
     console.log(process.env.SUPABASE_DATABASE_URL)
 });
