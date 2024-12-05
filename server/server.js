@@ -48,12 +48,14 @@ app.post('/auth/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        const result = await db.query(
-            'SELECT * FROM users WHERE username = $1 OR email = $2',
-            [username, email]
-        );
+        // ユーザー名またはメールアドレスが既に存在するか確認
+        const { data: existingUser, error: fetchError } = await supabase
+            .from('users')
+            .select('*')
+            .or(`username.eq.${username},email.eq.${email}`);
 
-        const existingUser = result.rows;
+        if (fetchError) throw fetchError;
+
         if (existingUser.length > 0) {
             return res.status(400).json({
                 error: 'ユーザー名またはメールアドレスがすでに使用されています。'
@@ -61,11 +63,18 @@ app.post('/auth/register', async (req, res) => {
         }
         //ハッシュ化
         const hashPassword = await bcrypt.hash(password, 10);
-        const result2 = await db.query('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)',[username, email, hashPassword]);
+        // const result2 = await db.query('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)',[username, email, hashPassword]);
 
-        const [users] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
-        const user = users[0];
-        const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
+        // const [users] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
+        // const user = users[0];
+        const { data: newUser, error: insertError } = await supabase
+            .from('users')
+            .insert([{ username, email, password: hashPassword }])
+            .select('*')
+            .single();
+
+        if (insertError) throw insertError;
+        const token = jwt.sign({ userId: newUser.id }, SECRET_KEY, { expiresIn: '1h' });
 
 
         res.status(201).json({ message: 'ユーザーが登録されました', token, });
@@ -254,12 +263,15 @@ app.get('/api/movies/:id/like', async (req, res) => {
         const userId = decoded.userId;
         const movieId = req.params.id;
 
-        const [result] = await db.query(
-            'SELECT * FROM Likes WHERE user_id = ? AND movie_id = ?',
-            [userId, movieId]
-        );
+        const { data: likes, error: fetchError } = await supabase
+            .from('likes')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('movie_id', movieId);
 
-        res.status(200).json({ isLiked: result.length > 0 });
+        if (fetchError) throw fetchError;
+
+        res.status(200).json({ isLiked: likes.length > 0 });
     } catch (error) {
         console.error('Error fetching like status:', error);
         res.status(500).json({ error: 'Failed to fetch like status' });
@@ -325,19 +337,43 @@ app.get('/api/movies/search', async (req,res) => {
 app.get('/api/movies/:id', async (req,res) => {
     const movieID = req.params.id;
     try {
-        const [existingMovie] = await db.query('SELECT * FROM Movies Where id = ?', [movieID]);
-        if (existingMovie.length > 0) {
-            return res.json(existingMovie[0]);
+        // Supabaseで映画データを検索
+        const { data: existingMovie, error: fetchError } = await supabase
+            .from('movies')
+            .select('*')
+            .eq('id', movieID)
+            .single(); // 単一の結果を取得
+
+        if (fetchError && fetchError.code !== 'PGRST116') {
+            // PGRST116はデータが存在しない場合のエラーコード
+            throw fetchError;
+        }
+        if (existingMovie) {
+            return res.json(existingMovie);
         };
 
         const response = await axios.get(`http://www.omdbapi.com/?i=${movieID}&apikey=${OMDB_API_KEY}`);
-        const movie = response.data.Search || [];
+        const movie = response.data;
 
-        await db.query('INSERT INTO Movies (id, title, year, posterurl, runtime, director, plot) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [imdbID, Title, Year, Poster, Runtime, Director, Plot]
-        );
+        const { imdbID, Title, Year, Poster, Runtime, Director, Plot } = movie;
+        const { data: insertedMovie, error: insertError } = await supabase
+            .from('movies')
+            .insert([
+                {
+                    id: imdbID,
+                    title: Title,
+                    year: Year,
+                    posterurl: Poster,
+                    runtime: Runtime,
+                    director: Director,
+                    plot: Plot,
+                },
+            ])
+            .select('*')
+            .single();
 
-        res.json(movie);
+        if (insertError) throw insertError;
+        res.json(insertedMovie);
     } catch (error) {
         console.error('Error fetching movie details', error);
         res.status(500).json({ error: 'Error fetching movie details' });
@@ -356,12 +392,15 @@ app.get('/api/records/:movieId', async(req,res) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         const userId = decoded.userId;
 
-        const [records] = await db.query(
-            'SELECT rating, comment FROM Records WHERE user_id = ? AND movie_id = ?',
-            [userId, movieId]
-        );
+        const { data: records, error: fetchError } = await supabase
+            .from('records')
+            .select('rating, comment')
+            .eq('user_id', userId)
+            .eq('movie_id', movieId);
 
-        if (records.length > 0) {
+        if (fetchError) throw fetchError;
+
+        if (records && records.length > 0) {
             res.status(200).json({ isRecorded: true, rating: records[0].rating, comment: records[0].comment, });
         } else {
             res.status(200).json({ isRecorded: false });
