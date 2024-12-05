@@ -27,13 +27,13 @@ const OMDB_API_KEY = process.env.OMDB_API_KEY;
 // });
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
 
-db.connect((err) => {
-    if (err) {
-        console.error('Database connection error:', err.stack);
-    } else {
-        console.log('Connected to Supabase database');
-    }
-});
+// db.connect((err) => {
+//     if (err) {
+//         console.error('Database connection error:', err.stack);
+//     } else {
+//         console.log('Connected to Supabase database');
+//     }
+// });
 
 app.use(cors());
 app.use(express.json());
