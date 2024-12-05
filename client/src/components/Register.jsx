@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import { API_BASE_URL } from "../config";
 
 const Register = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState("");
@@ -14,7 +15,7 @@ const Register = ({ setIsAuthenticated }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("/auth/register", {
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
         username,
         email,
         password,

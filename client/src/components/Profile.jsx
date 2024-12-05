@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -12,7 +13,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("/auth/profile", {
+        const response = await axios.get(`${API_BASE_URL}/auth/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -20,19 +21,25 @@ const Profile = () => {
         setProfile(response.data);
 
         // get liked movies list
-        const likesResponse = await axios.get("/api/users/likes", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const likesResponse = await axios.get(
+          `${API_BASE_URL}/api/users/likes`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         setLikeMovies(likesResponse.data);
 
         // get watched movies list
-        const watchedResponse = await axios.get("/api/users/watched", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const watchedResponse = await axios.get(
+          `${API_BASE_URL}/api/users/watched`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         setWatchedMovies(watchedResponse.data);
       } catch (err) {
         setError("プロフィール情報の取得に失敗しました");
