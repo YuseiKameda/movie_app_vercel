@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
 
 const MovieDetail = () => {
@@ -14,22 +15,28 @@ const MovieDetail = () => {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const response = await axios.get(`/api/movies/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/api/movies/${id}`);
         console.log(response.data);
         setMovie(response.data);
 
         const token = localStorage.getItem("token");
 
-        const recordResponse = await axios.get(`/api/records/${id}`, {
-          headers: { Authorization: ` Bearer ${token}` },
-        });
+        const recordResponse = await axios.get(
+          `${API_BASE_URL}/api/records/${id}`,
+          {
+            headers: { Authorization: ` Bearer ${token}` },
+          }
+        );
         setIsRecorded(recordResponse.data.isRecorded);
         setRating(recordResponse.data.rating || 0);
         setComment(recordResponse.data.comment || "");
 
-        const likeResponse = await axios.get(`/api/movies/${id}/like`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const likeResponse = await axios.get(
+          `${API_BASE_URL}/api/movies/${id}/like`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setIsLiked(likeResponse.data.isLiked);
       } catch (error) {
         console.error("Error fetching movie details", error);
