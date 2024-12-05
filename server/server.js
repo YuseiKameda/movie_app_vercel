@@ -88,9 +88,14 @@ app.post('/auth/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const [users] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
+        const { data: users, error: fetchError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email);
 
-        if (users.length === 0) {
+        if (fetchError) throw fetchError;
+
+        if (!users || users.length === 0) {
             return res.status(401).json({ error: 'user is not registered' });
         }
 
@@ -119,24 +124,32 @@ app.post("/api/movies/:id/like", async (req, res) => {
         const userId = decoded.userId;
         const movieId = req.params.id;
 
-        const [existingLike] = await db.query(
-        "SELECT * FROM Likes WHERE user_id = ? AND movie_id = ?",
-        [userId, movieId]
-        );
+        const { data: existingLike, error: fetchError } = await supabase
+            .from('likes')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('movie_id', movieId);
+
+        if (fetchError) throw fetchError;
 
         if (existingLike.length > 0) {
             // いいねが存在する場合、削除
-            await db.query(
-            "DELETE FROM Likes WHERE user_id = ? AND movie_id = ?",
-            [userId, movieId]
-            );
+            const { error: deleteError } = await supabase
+                .from('likes')
+                .delete()
+                .eq('user_id', userId)
+                .eq('movie_id', movieId);
+
+            if (deleteError) throw deleteError;
+
             return res.status(200).json({ isLiked: false });
         } else {
-        // いいねが存在しない場合、追加
-            await db.query(
-            "INSERT INTO Likes (user_id, movie_id) VALUES (?, ?)",
-            [userId, movieId]
-            );
+            // いいねが存在しない場合、追加
+            const { error: insertError } = await supabase
+            .from('likes')
+            .insert([{ user_id: userId, movie_id: movieId }]);
+
+            if (insertError) throw insertError;
             return res.status(200).json({ isLiked: true });
         }
     } catch (error) {
@@ -157,23 +170,40 @@ app.post('/api/records/add', async(req,res) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         const userId = decoded.userId;
 
-        const [existingRecord] = await db.query(
-            'SELECT * FROM Records WHERE user_id = ? AND movie_id = ?',
-            [userId, movieId]
-        );
+        const { data: existingRecord, error: fetchError } = await supabase
+            .from('records')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('movie_id', movieId)
+            .single();
+
+        if (fetchError && fetchError.code !== 'PGRST116') {
+            throw fetchError;
+        }
 
         if (existingRecord.length > 0) {
-            await db.query(
-                `UPDATE Records SET watched_at = ?, rating = ?, comment = ? WHERE user_id = ? AND movie_id = ?`,
-                [watchedAt, rating, comment, userId, movieId]
-            );
+            const { error: updateError } = await supabase
+                .from('records')
+                .update({ watched_at: watchedAt, rating, comment })
+                .eq('user_id', userId)
+                .eq('movie_id', movieId);
+
+            if (updateError) throw updateError;
             res.status(200).json({ message: 'Record update successfully' });
         } else {
-            await db.query(
-                `INSERT INTO Records (user_id, movie_id, watched_at, rating, comment)
-                VALUES (?, ?, ?, ?, ?)`,
-                [userId, movieId, watchedAt, rating, comment]
-            );
+            const { error: insertError } = await supabase
+                .from('records')
+                .insert([
+                    {
+                        user_id: userId,
+                        movie_id: movieId,
+                        watched_at: watchedAt,
+                        rating,
+                        comment,
+                    },
+                ]);
+
+            if (insertError) throw insertError;
             res.status(201).json({ message: 'Movie recorded successfully' });
         }
     } catch (error) {
@@ -193,12 +223,19 @@ app.get('/auth/profile', async (req, res) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         const userId = decoded.userId;
 
-        const [users] = await db.query('SELECT username, email, created_at FROM Users WHERE id = ?', [userId]);
-        if (users.length === 0) {
-            return res.status(401).json({ error: 'ユーザーが見つかりません' });
+        const { data: user, error: fetchError } = await supabase
+            .from('users')
+            .select('username, email, created_at')
+            .eq('id', userId)
+            .single(); // 単一の結果を取得
+
+        if (fetchError) throw fetchError;
+
+        if (!user) {
+            return res.status(404).json({ error: 'ユーザーが見つかりません' });
         }
 
-        res.json(users[0]);
+        res.json(user);
     } catch (error) {
         console.error('Error verifying token:', error);
         res.status(401).json({ error: '無効なトークンです' });
@@ -213,15 +250,14 @@ app.get('/api/users/likes', async(req,res) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         const userId = decoded.userId;
 
-        const [likeMovies] = await db.query(
-            `SELECT Movies.id, Movies.title, Movies.posterurl, Movies.year
-            FROM Likes
-            JOIN Movies ON Likes.Movie_id = Movies.id
-            WHERE Likes.user_id = ?`,
-            [userId]
-        );
+        const { data: likeMovies, error: fetchError } = await supabase
+            .from('likes')
+            .select('movies(id, title, posterurl, year)')
+            .eq('user_id', userId);
 
-        res.status(200).json(likeMovies);
+        if (fetchError) throw fetchError;
+
+        res.status(200).json(likeMovies.map(like => like.movies));
     } catch (error) {
         console.error('error fetching likes movies:', error);
         res.status(500).json({ error: 'Failed to fetch liked movies' });
@@ -239,15 +275,25 @@ app.get('/api/users/watched', async(req, res) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         const userId = decoded.userId;
 
-        const [watchedMovies] = await db.query(
-            `SELECT Movies.id, Movies.title, Movies.posterurl, Movies.year, Records.rating, Records.comment
-            FROM Records
-            JOIN Movies ON Records.movie_id = Movies.id
-            WHERE Records.user_id = ?`,
-            [userId]
-        );
+        const { data: watchedMovies, error: fetchError } = await supabase
+            .from('records')
+            .select(`
+                movies (id, title, posterurl, year),
+                rating,
+                comment
+            `)
+            .eq('user_id', userId);
 
-        res.status(200).json(watchedMovies);
+        if (fetchError) throw fetchError;
+
+        // movies部分とその他のフィールドをマージ
+        const formattedMovies = watchedMovies.map(record => ({
+            ...record.movies,
+            rating: record.rating,
+            comment: record.comment,
+        }));
+
+        res.status(200).json(formattedMovies);
     } catch (error) {
         console.error('error fetching watched movies:', error);
         res.status(500).json({ error: ' failed to fetch watched movies' });
@@ -423,12 +469,15 @@ app.put('/api/records/update', async(req, res) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         const userId = decoded.userId;
 
-        const [result] = await db.query(
-            'Update Records SET rating = ?, comment = ? WHERE user_id = ? AND movie_id = ?',
-            [rating, comment, userId, movieId]
-        );
+        const { data, error: updateError } = await supabase
+            .from('records')
+            .update({ rating, comment })
+            .eq('user_id', userId)
+            .eq('movie_id', movieId);
 
-        if (result.affectedRows === 0) {
+        if (updateError) throw updateError;
+
+        if (data.length === 0) {
             return res.status(404).json({ error: 'Record not found' });
         }
         res.status(200).json({ message: 'Record update successfully' });
