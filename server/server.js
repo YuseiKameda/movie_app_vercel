@@ -37,6 +37,8 @@ app.use(express.json());
 
 app.get('/', async (req, res) => {
     res.send('home and supabase working');
+    console.log('Hello:',process.env.OMDB_API_KEY);
+    console.log(process.env.SUPABASE_DATABASE_URL)
 });
 
 app.post('/auth/register', async (req, res) => {
