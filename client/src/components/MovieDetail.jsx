@@ -54,7 +54,7 @@ const MovieDetail = () => {
       }
 
       await axios.put(
-        "/api/records/update",
+        `${API_BASE_URL}/api/records/update`,
         { movieId: id, rating, comment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -77,7 +77,7 @@ const MovieDetail = () => {
       const watchedAt = new Date().toISOString().split("T")[0];
 
       await axios.post(
-        "/api/records/add",
+        `${API_BASE_URL}/api/records/add`,
         { movieId: id, watchedAt, rating, comment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -99,7 +99,7 @@ const MovieDetail = () => {
       }
 
       const response = await axios.post(
-        `/api/movies/${id}/like`,
+        `${API_BASE_URL}/api/movies/${id}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
