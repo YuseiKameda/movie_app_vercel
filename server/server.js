@@ -46,7 +46,7 @@ app.post('/auth/register', async (req, res) => {
 
     try {
         const result = await db.query(
-            'SELECT * FROM Users WHERE username = $1 OR email = $2',
+            'SELECT * FROM users WHERE username = $1 OR email = $2',
             [username, email]
         );
 
@@ -267,7 +267,7 @@ app.get('/api/movies/search', async (req,res) => {
     const query = req.query.q;
 
     try {
-        const result = await db.query('SELECT * FROM Movies WHERE title ILIKE $1', [`%${query}%`]);
+        const result = await db.query('SELECT * FROM movies WHERE title ILIKE $1', [`%${query}%`]);
         const movies = result.rows;
 
         if (movies.length > 0) {
@@ -284,7 +284,7 @@ app.get('/api/movies/search', async (req,res) => {
             const { Runtime, Director, Plot } = movieDetails.data;
 
             await db.query(
-                'INSERT INTO Movies (id, title, year, posterurl, runtime, director, plot ) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING',
+                'INSERT INTO movies (id, title, year, posterurl, runtime, director, plot ) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING',
                 [imdbID, Title, Year, Poster, Runtime, Director, Plot]
             );
         }
