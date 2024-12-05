@@ -1,0 +1,13 @@
+{
+    "version": 2,
+    "rewrites": [
+      {
+        "source": "/movies/:id",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/(.*)",
+        "destination": "/index.html"
+      }
+    ]
+  }
