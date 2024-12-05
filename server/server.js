@@ -6,6 +6,7 @@ const mysql = require('mysql2/promise');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
 
 dotenv.config();
 
@@ -13,16 +14,18 @@ const app = express();
 const port = process.env.PORT || 3000;
 const SECRET_KEY = process.env.JWT_SECRET;
 const OMDB_API_KEY = process.env.OMDB_API_KEY;
-const db = new Pool({
-    connectionString: process.env.SUPABASE_DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-});
+// const db = new Pool({
+//     connectionString: process.env.SUPABASE_DATABASE_URL,
+//     ssl: { rejectUnauthorized: false }
+// });
+
 // const db = mysql.createPool({
 //     host: process.env.DB_HOST,
 //     user: process.env.DB_USER,
 //     password: process.env.DB_PASSWORD,
 //     database: process.env.DB_NAME
 // });
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
 
 db.connect((err) => {
     if (err) {
@@ -267,8 +270,14 @@ app.get('/api/movies/search', async (req,res) => {
     const query = req.query.q;
 
     try {
-        const result = await db.query('SELECT * FROM movies WHERE title ILIKE $1', [`%${query}%`]);
-        const movies = result.rows;
+        // const result = await db.query('SELECT * FROM movies WHERE title ILIKE $1', [`%${query}%`]);
+        // const movies = result.rows;
+        const { data: movies, error } = await supabase
+            .from('movies')
+            .select('*')
+            .ilike('title', `%${query}%`);
+
+        if (error) throw error;
 
         if (movies.length > 0) {
             return res.json(movies);
@@ -283,10 +292,21 @@ app.get('/api/movies/search', async (req,res) => {
             const movieDetails = await axios.get(`http://www.omdbapi.com/?i=${imdbID}&apikey=${OMDB_API_KEY}`);
             const { Runtime, Director, Plot } = movieDetails.data;
 
-            await db.query(
-                'INSERT INTO movies (id, title, year, posterurl, runtime, director, plot ) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING',
-                [imdbID, Title, Year, Poster, Runtime, Director, Plot]
-            );
+            // await db.query(
+            //     'INSERT INTO movies (id, title, year, posterurl, runtime, director, plot ) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING',
+            //     [imdbID, Title, Year, Poster, Runtime, Director, Plot]
+            // );
+            await supabase
+                .from('movies')
+                .upsert({
+                    id: imdbID,
+                    title: Title,
+                    year: Year,
+                    posterurl: Poster,
+                    runtime: Runtime,
+                    director: Director,
+                    plot: Plot,
+                });
         }
 
         const formattedMovies = apiMovies.map(movie => ({
