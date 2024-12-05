@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
+import { Star, Send, Bookmark, ArrowLeft } from "lucide-react";
 import axios from "axios";
 
 const MovieDetail = () => {
@@ -11,6 +12,8 @@ const MovieDetail = () => {
   const [isRecorded, setIsRecorded] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const navigate = useNavigate();
+
+  const [hover, setHover] = useState(0);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -90,7 +93,7 @@ const MovieDetail = () => {
     }
   };
 
-  const handleLikClick = async () => {
+  const handleLikeClick = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -139,56 +142,92 @@ const MovieDetail = () => {
               {!isRecorded ? (
                 <>
                   <div>
-                    <label>評価を選択：</label>
-                    <select
-                      value={rating}
-                      onChange={(e) => setRating(e.target.value)}
-                      className="flex space-x-1"
-                    >
-                      {[1, 2, 3, 4, 5].map((r) => (
-                        <option key={r} value={r}>
-                          {r} 星
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex items-center space-x-2">
+                      {[...Array(5)].map((_, index) => {
+                        const starValue = index + 1;
+                        return (
+                          <button
+                            key={starValue}
+                            className={`transition-all duration-300 transform hover:scale-110 focus:outline-none ${
+                              (hover || rating) >= starValue
+                                ? "text-yellow-400"
+                                : "text-gray-400"
+                            }`}
+                            onClick={() => setRating(starValue)}
+                            onMouseEnter={() => setHover(starValue)}
+                            onMouseLeave={() => setHover(0)}
+                          >
+                            <Star
+                              size={20}
+                              fill={
+                                (hover || rating) >= starValue
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                              strokeWidth={1.5}
+                            />
+                          </button>
+                        );
+                      })}
+                      <span>{rating ? rating : "tap"}</span>
+                    </div>
                   </div>
                   <div>
                     <textarea
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      placeholder="コメントを記入してください"
+                      placeholder="comment"
                       className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       rows={4}
                     />
                   </div>
                   <button
                     onClick={handleRecordMovie}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!rating}
                   >
-                    見た映画に追加
+                    <Send className="mr-2" size={20} />
+                    record
                   </button>
                 </>
               ) : (
                 <>
                   <div>
-                    <label>評価を編集：</label>
-                    <select
-                      value={rating}
-                      onChange={(e) => setRating(e.target.value)}
-                      className="flex space-x-1"
-                    >
-                      {[1, 2, 3, 4, 5].map((r) => (
-                        <option key={r} value={r}>
-                          {r} 星
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex items-center space-x-2">
+                      {[...Array(5)].map((_, index) => {
+                        const starValue = index + 1;
+                        return (
+                          <button
+                            key={starValue}
+                            className={`transition-all duration-300 transform hover:scale-110 focus:outline-none ${
+                              (hover || rating) >= starValue
+                                ? "text-yellow-400"
+                                : "text-gray-400"
+                            }`}
+                            onClick={() => setRating(starValue)}
+                            onMouseEnter={() => setHover(starValue)}
+                            onMouseLeave={() => setHover(0)}
+                          >
+                            <Star
+                              size={20}
+                              fill={
+                                (hover || rating) >= starValue
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                              strokeWidth={1.5}
+                            />
+                          </button>
+                        );
+                      })}
+                      <span>{rating ? rating : "tap"}</span>
+                    </div>
                   </div>
                   <div>
                     <textarea
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      placeholder="コメントを編集してください"
+                      placeholder="edit comment"
                       className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       rows={4}
                     />
@@ -197,25 +236,34 @@ const MovieDetail = () => {
                     onClick={handleUpdateRecord}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300"
                   >
-                    記録を更新
+                    update
                   </button>
                 </>
               )}
 
               <button
+                onClick={handleLikeClick}
+                className={`mt-2 space-x-2 px-4 py-2 rounded transition-colors duration-300 ${
+                  isLiked
+                    ? "bg-yellow-500 text-white"
+                    : "bg-gray-300 text-gray-700"
+                } hover:bg-yellow-600 hover:text-white`}
+              >
+                <Bookmark
+                  size={20}
+                  fill={isLiked ? "currentColor" : "none"}
+                  strokeWidth={1.5}
+                  className="transition-transform duration-300 transform hover:scale-110"
+                />
+              </button>
+              <button
                 onClick={() =>
                   window.history.length > 1 ? navigate(-1) : navigate("/")
                 }
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="mt-6 flex items-center text-gray-300 hover:text-white transition-colors duration-300"
               >
-                戻る
-              </button>
-
-              <button
-                onClick={handleLikClick}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                {isLiked ? "いいねを取り消す" : "いいね"}
+                <ArrowLeft size={20} className="mr-2" />
+                back
               </button>
             </div>
           </div>

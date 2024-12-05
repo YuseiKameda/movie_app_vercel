@@ -14,34 +14,16 @@ const app = express();
 const port = process.env.PORT || 3000;
 const SECRET_KEY = process.env.JWT_SECRET;
 const OMDB_API_KEY = process.env.OMDB_API_KEY;
-// const db = new Pool({
-//     connectionString: process.env.SUPABASE_DATABASE_URL,
-//     ssl: { rejectUnauthorized: false }
-// });
 
-// const db = mysql.createPool({
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     password: process.env.DB_PASSWORD,
-//     database: process.env.DB_NAME
-// });
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
 
-// db.connect((err) => {
-//     if (err) {
-//         console.error('Database connection error:', err.stack);
-//     } else {
-//         console.log('Connected to Supabase database');
-//     }
-// });
 
 app.use(cors());
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-    res.send(`home and supabase working: environment value:${process.env.SUPABASE_DATABASE_URL}`);
+    res.send(`home and supabase working: environment value:`);
     console.log('Hello:',process.env.OMDB_API_KEY);
-    console.log(process.env.SUPABASE_DATABASE_URL)
 });
 
 app.post('/auth/register', async (req, res) => {
