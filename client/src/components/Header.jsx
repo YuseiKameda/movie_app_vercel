@@ -13,11 +13,11 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
   return (
     <header className="bg-gray-900 text-gray-100 shadow-lg">
       <nav className="container mx-auto flex justify-between items-center p-4">
-        <h1 className="text-xl font-bold text-red-500">Movie App</h1>
+        <h1 className="text-xl font-bold text-blue-500">Movie App</h1>
         <ul className="flex space-x-4">
           <li>
             <Link to="/" className="hover:text-red-500 transition-colors">
-              Home
+              Search
             </Link>
           </li>
           {isAuthenticated && (
@@ -32,9 +32,12 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
           )}
           {isAuthenticated ? (
             <>
-              <li className="hover:text-red-500 transition-colors">
-                <button onClick={handleLogout}>Logout</button>
-              </li>
+              <button
+                onClick={handleLogout}
+                className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Logout
+              </button>
             </>
           ) : (
             <>
@@ -51,7 +54,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
                   to="/login"
                   className="hover:text-red-500 transition-colors"
                 >
-                  ログイン
+                  login
                 </Link>
               </li>
             </>

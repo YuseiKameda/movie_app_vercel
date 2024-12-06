@@ -19,7 +19,7 @@ const MovieDetail = () => {
     const fetchMovie = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/movies/${id}`);
-        console.log(response.data);
+        // console.log(response.data);
         setMovie(response.data);
 
         const token = localStorage.getItem("token");
@@ -52,7 +52,7 @@ const MovieDetail = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("ログインが必要です");
+        alert("Login required");
         return;
       }
 
@@ -62,10 +62,10 @@ const MovieDetail = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert("記録を更新しました！");
+      alert("Update record!");
     } catch (error) {
       console.error("error updating record:", error);
-      alert("記録の更新に失敗しました");
+      alert("Update failed");
     }
   };
 
@@ -73,7 +73,7 @@ const MovieDetail = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("ログインが必要です");
+        alert("Login required");
         return;
       }
 
@@ -86,10 +86,10 @@ const MovieDetail = () => {
       );
 
       setIsRecorded(true);
-      alert("映画を記録しました！");
+      alert("Recorded");
     } catch (error) {
       console.error("Error recording movie", error);
-      alert("映画の記録に失敗しました");
+      alert("Record failed");
     }
   };
 
@@ -97,7 +97,7 @@ const MovieDetail = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("ログインが必要です");
+        alert("Login required");
         return;
       }
 

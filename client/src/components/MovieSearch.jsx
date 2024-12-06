@@ -22,7 +22,7 @@ const MovieSearch = () => {
       const response = await axios.get(
         `${API_BASE_URL}/api/movies/search?q=${searchQuery}`
       );
-      console.log(response.data);
+      // console.log(response.data);
       setMovies(response.data);
     } catch (error) {
       console.error("Error fetching data", error);
@@ -58,11 +58,11 @@ const MovieSearch = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search for a movie"
-              className="flex-grow px-4 py-2 rounded-l-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="flex-grow px-4 py-2 rounded-l-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="submit"
-              className="px-6 py-2 bg-red-600 text-white rounded-r-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="px-6 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Search
             </button>

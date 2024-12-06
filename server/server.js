@@ -23,7 +23,6 @@ app.use(express.json());
 
 app.get('/', async (req, res) => {
     res.send(`home and supabase working: environment value:`);
-    console.log('Hello:',process.env.OMDB_API_KEY);
 });
 
 app.post('/auth/register', async (req, res) => {
@@ -82,7 +81,6 @@ app.post('/auth/login', async (req, res) => {
         }
 
         const user = users[0];
-        console.log('User:',user);
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
@@ -90,7 +88,6 @@ app.post('/auth/login', async (req, res) => {
         }
 
         const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h'});
-        console.log('User id:',user.id);
 
         res.json({ message: 'login succeeded', token });
     } catch (error) {
