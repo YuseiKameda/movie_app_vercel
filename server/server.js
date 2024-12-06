@@ -459,7 +459,7 @@ app.put('/api/records/update', async(req, res) => {
 
         if (updateError) throw updateError;
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             return res.status(404).json({ error: 'Record not found' });
         }
         res.status(200).json({ message: 'Record update successfully' });
