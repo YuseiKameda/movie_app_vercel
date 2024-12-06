@@ -6,7 +6,7 @@ import { Calendar, Film, Bookmark } from "lucide-react";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
-  const [likedMovies, setLikeMovies] = useState([]);
+  const [bookmarkedMovies, setBookmarkedMovies] = useState([]);
   const [watchedMovies, setWatchedMovies] = useState([]);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("watched");
@@ -22,16 +22,16 @@ const Profile = () => {
         });
         setProfile(response.data);
 
-        // get liked movies list
-        const likesResponse = await axios.get(
-          `${API_BASE_URL}/api/users/likes`,
+        // get bookmarked movies list
+        const bookmarksResponse = await axios.get(
+          `${API_BASE_URL}/api/users/bookmarks`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        setLikeMovies(likesResponse.data);
+        setBookmarkedMovies(bookmarksResponse.data || []);
 
         // get watched movies list
         const watchedResponse = await axios.get(
@@ -51,7 +51,7 @@ const Profile = () => {
 
     fetchProfile();
   }, []);
-  const movies = activeTab === "watched" ? watchedMovies : likedMovies;
+  const movies = activeTab === "watched" ? watchedMovies : bookmarkedMovies;
 
   if (error) {
     return <div>{error}</div>;

@@ -99,7 +99,7 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
-app.post("/api/movies/:id/like", async (req, res) => {
+app.post("/api/movies/:id/bookmark", async (req, res) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ error: "Unauthorized" });
 
@@ -108,37 +108,37 @@ app.post("/api/movies/:id/like", async (req, res) => {
         const userId = decoded.userId;
         const movieId = req.params.id;
 
-        const { data: existingLike, error: fetchError } = await supabase
-            .from('likes')
+        const { data: existingBookmark, error: fetchError } = await supabase
+            .from('bookmarks')
             .select('*')
             .eq('user_id', userId)
             .eq('movie_id', movieId);
 
         if (fetchError) throw fetchError;
 
-        if (existingLike.length > 0) {
+        if (existingBookmark.length > 0) {
             // いいねが存在する場合、削除
             const { error: deleteError } = await supabase
-                .from('likes')
+                .from('bookmarks')
                 .delete()
                 .eq('user_id', userId)
                 .eq('movie_id', movieId);
 
             if (deleteError) throw deleteError;
 
-            return res.status(200).json({ isLiked: false });
+            return res.status(200).json({ isBookmarked: false });
         } else {
             // いいねが存在しない場合、追加
             const { error: insertError } = await supabase
-            .from('likes')
+            .from('bookmarks')
             .insert([{ user_id: userId, movie_id: movieId }]);
 
             if (insertError) throw insertError;
-            return res.status(200).json({ isLiked: true });
+            return res.status(200).json({ isBookmarked: true });
         }
     } catch (error) {
-        console.error("Error toggling like status:", error);
-        res.status(500).json({ error: "Failed to toggle like status" });
+        console.error("Error toggling bookmark status:", error);
+        res.status(500).json({ error: "Failed to toggle bookmark status" });
     }
 });
 
@@ -226,7 +226,7 @@ app.get('/auth/profile', async (req, res) => {
     }
 });
 
-app.get('/api/users/likes', async(req,res) => {
+app.get('/api/users/bookmarks', async(req,res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -234,17 +234,17 @@ app.get('/api/users/likes', async(req,res) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         const userId = decoded.userId;
 
-        const { data: likeMovies, error: fetchError } = await supabase
-            .from('likes')
+        const { data: bookmarkMovies, error: fetchError } = await supabase
+            .from('bookmarks')
             .select('movies(id, title, posterurl, year)')
             .eq('user_id', userId);
 
         if (fetchError) throw fetchError;
 
-        res.status(200).json(likeMovies.map(like => like.movies));
+        res.status(200).json(bookmarkMovies.map(bookmark => bookmark.movies));
     } catch (error) {
-        console.error('error fetching likes movies:', error);
-        res.status(500).json({ error: 'Failed to fetch liked movies' });
+        console.error('error fetching bookmarked movies:', error);
+        res.status(500).json({ error: 'Failed to fetch bookmarked movies' });
     }
 });
 
@@ -284,7 +284,7 @@ app.get('/api/users/watched', async(req, res) => {
     }
 });
 
-app.get('/api/movies/:id/like', async (req, res) => {
+app.get('/api/movies/:id/bookmarks', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -293,18 +293,18 @@ app.get('/api/movies/:id/like', async (req, res) => {
         const userId = decoded.userId;
         const movieId = req.params.id;
 
-        const { data: likes, error: fetchError } = await supabase
-            .from('likes')
+        const { data: bookmarks, error: fetchError } = await supabase
+            .from('bookmarks')
             .select('*')
             .eq('user_id', userId)
             .eq('movie_id', movieId);
 
         if (fetchError) throw fetchError;
 
-        res.status(200).json({ isLiked: likes.length > 0 });
+        res.status(200).json({ isBookmarked: bookmarks.length > 0 });
     } catch (error) {
-        console.error('Error fetching like status:', error);
-        res.status(500).json({ error: 'Failed to fetch like status' });
+        console.error('Error fetching bookmark status:', error);
+        res.status(500).json({ error: 'Failed to fetch bookmark status' });
     }
 });
 

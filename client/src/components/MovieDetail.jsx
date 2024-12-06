@@ -10,7 +10,7 @@ const MovieDetail = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isRecorded, setIsRecorded] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const navigate = useNavigate();
 
   const [hover, setHover] = useState(0);
@@ -34,13 +34,13 @@ const MovieDetail = () => {
         setRating(recordResponse.data.rating || 0);
         setComment(recordResponse.data.comment || "");
 
-        const likeResponse = await axios.get(
-          `${API_BASE_URL}/api/movies/${id}/like`,
+        const bookmarkResponse = await axios.get(
+          `${API_BASE_URL}/api/movies/${id}/bookmarks`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setIsLiked(likeResponse.data.isLiked);
+        setIsBookmarked(bookmarkResponse.data.isBookmarked);
       } catch (error) {
         console.error("Error fetching movie details", error);
       }
@@ -93,7 +93,7 @@ const MovieDetail = () => {
     }
   };
 
-  const handleLikeClick = async () => {
+  const handleBookmarkClick = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -102,15 +102,15 @@ const MovieDetail = () => {
       }
 
       const response = await axios.post(
-        `${API_BASE_URL}/api/movies/${id}/like`,
+        `${API_BASE_URL}/api/movies/${id}/bookmark`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setIsLiked(response.data.isLiked);
+      setIsBookmarked(response.data.isBookmarked);
     } catch (error) {
-      console.error("Error liking movie:", error);
-      alert("いいねに失敗しました");
+      console.error("Error bookmarking movie:", error);
+      alert("bookmarking failed");
     }
   };
 
@@ -242,16 +242,16 @@ const MovieDetail = () => {
               )}
 
               <button
-                onClick={handleLikeClick}
+                onClick={handleBookmarkClick}
                 className={`mt-2 space-x-2 px-4 py-2 rounded transition-colors duration-300 ${
-                  isLiked
+                  isBookmarked
                     ? "bg-yellow-500 text-white"
                     : "bg-gray-300 text-gray-700"
                 } hover:bg-yellow-600 hover:text-white`}
               >
                 <Bookmark
                   size={20}
-                  fill={isLiked ? "currentColor" : "none"}
+                  fill={isBookmarked ? "currentColor" : "none"}
                   strokeWidth={1.5}
                   className="transition-transform duration-300 transform hover:scale-110"
                 />
