@@ -451,7 +451,23 @@ app.put('/api/records/update', async(req, res) => {
         const decoded = jwt.verify(token, SECRET_KEY);
         const userId = decoded.userId;
 
-        const { data, error: updateError } = await supabase
+        const { data: existingRecord, error: fetchError } = await supabase
+            .from('records')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('movie_id', movieId)
+            .single();
+
+        if (fetchError && fetchError.code !== 'PGRST116') {
+            throw fetchError;
+        }
+
+        if (!existingRecord) {
+            console.error('No record found to update');
+            return res.status(404).json({ error: 'Record not found' });
+        }
+
+        const { error: updateError } = await supabase
             .from('records')
             .update({ rating: Number(rating), comment })
             .eq('user_id', userId)
@@ -459,9 +475,6 @@ app.put('/api/records/update', async(req, res) => {
 
         if (updateError) throw updateError;
 
-        if (!data || data.length === 0) {
-            return res.status(404).json({ error: 'Record not found' });
-        }
         res.status(200).json({ message: 'Record update successfully' });
     } catch (error) {
         console.error('error updating record:', error);
