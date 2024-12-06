@@ -26,7 +26,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
                 to="/profile"
                 className="hover:text-red-500 transition-colors"
               >
-                プロフィール
+                Profile
               </Link>
             </li>
           )}
