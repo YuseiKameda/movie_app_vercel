@@ -74,8 +74,10 @@ const Login = ({ setIsAuthenticated }) => {
             </button>
           </div>
         </form>
+        {message && (
+          <div className="text-center text-red-500 mt-6">{message}</div>
+        )}
       </div>
-      {message && <p>{message}</p>}
     </div>
   );
 };
