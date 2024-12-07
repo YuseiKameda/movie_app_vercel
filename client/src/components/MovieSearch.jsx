@@ -21,6 +21,7 @@ const MovieSearch = () => {
   // 検索機能
   const handleSearch = useCallback(async (searchQuery) => {
     setLoading(true);
+    setErrorMessage("");
     try {
       const response = await axios.get(
         `${API_BASE_URL}/api/movies/search?q=${searchQuery}`

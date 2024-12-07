@@ -8,10 +8,12 @@ const Login = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, {
@@ -20,10 +22,13 @@ const Login = ({ setIsAuthenticated }) => {
       });
       localStorage.setItem("token", response.data.token);
       setIsAuthenticated(true);
+      setMessage("");
       navigate("/");
     } catch (error) {
       setMessage(error.response?.data?.error || "login failure");
       console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,11 +71,18 @@ const Login = ({ setIsAuthenticated }) => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent
-              text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none
-              focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
+                isLoading
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+              }`}
+              disabled={isLoading}
             >
-              login
+              {isLoading ? (
+                <span className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+              ) : (
+                "Login"
+              )}
             </button>
           </div>
         </form>

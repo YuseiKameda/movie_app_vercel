@@ -75,8 +75,8 @@ const Profile = () => {
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="text-center sm:text-left">
-          <h1 className="text-2xl font-bold">{profile.username}</h1>
-          <p className="text-gray-600 flex items-center justify-center sm:justify-start mt-2">
+          <h1 className="ml-4 text-2xl font-bold">{profile.username}</h1>
+          <p className="ml-4 text-gray-600 flex items-center justify-center sm:justify-start mt-2">
             <Calendar size={16} className="mr-2" />
             Joined on {new Date(profile.created_at).toLocaleDateString()}
           </p>
