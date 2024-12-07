@@ -15,18 +15,26 @@ const MovieSearch = () => {
   });
 
   const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // 検索機能
   const handleSearch = useCallback(async (searchQuery) => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `${API_BASE_URL}/api/movies/search?q=${searchQuery}`
       );
-      // console.log(response.data);
+      if (response.data.length === 0) {
+        setErrorMessage("movie not found. please change search words");
+      }
+      console.log(response.data);
       setMovies(response.data);
     } catch (error) {
       console.error("Error fetching data", error);
       setMovies([]);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -69,30 +77,39 @@ const MovieSearch = () => {
           </div>
         </form>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
-        {movies.map((movie) => (
-          <div
-            key={movie.id}
-            className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
-          >
-            <div className="p-4">
-              <h3 className="text-gray-500 text-xl font-semibold mb-2">
-                <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
-              </h3>
+      {loading ? (
+        <div className="min-h-screen bg-gray-900 text-gray-100 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          <p className="ml-4 text-lg">Loading...</p>
+        </div>
+      ) : errorMessage ? (
+        <div className="text-center text-red-500">{errorMessage}</div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          {movies.map((movie) => (
+            <div
+              key={movie.id}
+              className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
+            >
+              <div className="p-4">
+                <h3 className="text-gray-500 text-xl font-semibold mb-2">
+                  <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+                </h3>
+              </div>
+              <Link to={`/movies/${movie.id}`}>
+                <img
+                  src={movie.posterurl}
+                  alt={movie.title}
+                  width={300}
+                  height={400}
+                  className="w-full object-cover"
+                />
+              </Link>
+              <p className="text-gray-400">{movie.year}</p>
             </div>
-            <Link to={`/movies/${movie.id}`}>
-              <img
-                src={movie.posterurl}
-                alt={movie.title}
-                width={300}
-                height={400}
-                className="w-full object-cover"
-              />
-            </Link>
-            <p className="text-gray-400">{movie.year}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

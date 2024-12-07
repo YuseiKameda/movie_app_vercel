@@ -39,7 +39,7 @@ app.post('/auth/register', async (req, res) => {
 
         if (existingUser.length > 0) {
             return res.status(400).json({
-                error: 'ユーザー名またはメールアドレスがすでに使用されています。'
+                error: 'Username or e-mail address is already in use.'
             });
         }
         //ハッシュ化
@@ -58,10 +58,10 @@ app.post('/auth/register', async (req, res) => {
         const token = jwt.sign({ userId: newUser.id }, SECRET_KEY, { expiresIn: '1h' });
 
 
-        res.status(201).json({ message: 'ユーザーが登録されました', token, });
+        res.status(201).json({ message: 'User has been registered', token, });
     } catch (error) {
         console.error('Error registering user:', error);
-        res.status(500).json({ error: 'ユーザー登録に失敗しました' });
+        res.status(500).json({ error: 'registration failed' });
     }
 })
 
@@ -197,7 +197,7 @@ app.get('/auth/profile', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({ error: 'トークンが必要です' });
+        return res.status(401).json({ error: 'token required' });
     }
 
     try {
@@ -213,13 +213,13 @@ app.get('/auth/profile', async (req, res) => {
         if (fetchError) throw fetchError;
 
         if (!user) {
-            return res.status(404).json({ error: 'ユーザーが見つかりません' });
+            return res.status(404).json({ error: 'user not found' });
         }
 
         res.json(user);
     } catch (error) {
         console.error('Error verifying token:', error);
-        res.status(401).json({ error: '無効なトークンです' });
+        res.status(401).json({ error: 'invalid token' });
     }
 });
 
@@ -480,5 +480,5 @@ app.put('/api/records/update', async(req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`サーバー起動 ${port}`);
+    console.log(`server start ${port}`);
 });

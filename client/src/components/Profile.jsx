@@ -10,9 +10,11 @@ const Profile = () => {
   const [watchedMovies, setWatchedMovies] = useState([]);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("watched");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
+      setLoading(true);
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(`${API_BASE_URL}/auth/profile`, {
@@ -46,6 +48,8 @@ const Profile = () => {
       } catch (err) {
         setError("プロフィール情報の取得に失敗しました");
         console.error("Error fetching profile:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -57,8 +61,14 @@ const Profile = () => {
     return <div>{error}</div>;
   }
 
-  if (!profile) {
-    return <div>Loading...</div>;
+  if (loading) {
+    // ローディング中の表示
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        <p className="ml-4 text-lg">Loading...</p>
+      </div>
+    );
   }
 
   return (

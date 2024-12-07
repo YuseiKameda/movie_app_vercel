@@ -24,7 +24,7 @@ const Register = ({ setIsAuthenticated }) => {
       setIsAuthenticated(true);
       navigate("/");
     } catch (error) {
-      setMessage(error.response?.data?.error || "登録に失敗しました");
+      setMessage(error.response?.data?.error || "registration failed");
       console.error("Registration error:", error);
     }
   };
