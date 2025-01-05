@@ -29,7 +29,7 @@ const MovieSearch = () => {
       if (response.data.length === 0) {
         setErrorMessage("movie not found. please change search words");
       }
-      console.log(response.data);
+      // console.log(response.data);
       setMovies(response.data);
     } catch (error) {
       console.error("Error fetching data", error);
