@@ -23,24 +23,25 @@ const MovieDetail = () => {
         setMovie(response.data);
 
         const token = localStorage.getItem("token");
-
-        const recordResponse = await axios.get(
-          `${API_BASE_URL}/api/records/${id}`,
-          {
-            headers: { Authorization: ` Bearer ${token}` },
-          }
-        );
-        setIsRecorded(recordResponse.data.isRecorded);
-        setRating(recordResponse.data.rating || 0);
-        setComment(recordResponse.data.comment || "");
-
-        const bookmarkResponse = await axios.get(
-          `${API_BASE_URL}/api/movies/${id}/bookmarks`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setIsBookmarked(bookmarkResponse.data.isBookmarked);
+        if (token) {
+          const recordResponse = await axios.get(
+            `${API_BASE_URL}/api/records/${id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setIsRecorded(recordResponse.data.isRecorded);
+          setRating(recordResponse.data.rating || 0);
+          setComment(recordResponse.data.comment || "");
+  
+          const bookmarkResponse = await axios.get(
+            `${API_BASE_URL}/api/movies/${id}/bookmarks`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setIsBookmarked(bookmarkResponse.data.isBookmarked);
+        }
       } catch (error) {
         console.error("Error fetching movie details", error);
       }

@@ -409,7 +409,7 @@ app.get('/api/records/:movieId', async(req,res) => {
     const { movieId } = req.params;
     const token = req.headers.authorization?.split(' ')[1];
 
-    if (!token) {
+    if (!token || token === 'null') {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
