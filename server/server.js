@@ -17,8 +17,13 @@ const OMDB_API_KEY = process.env.OMDB_API_KEY;
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
 
+const corsOptions = {
+    origin: ['https://movie-app-vercel-client.vercel.app', 'http://localhost:5173'],
+    optionsSuccessStatus: 200,
+};
 
-app.use(cors());
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', async (req, res) => {
